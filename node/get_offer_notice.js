@@ -47,7 +47,7 @@ async function scrape_images(pageUrl){
             
             filtered.forEach(product => {
                 // Get the first word of the product name
-                let capital_words = product.match(/\b[A-ZÆØÅÖÜ][a-zæøåöüA-ZÆØÅÖÜ]*\b/g);
+                let capital_words = product.match(/\p{Lu}\p{L}*/gu);
                 const unusable_words = ['Plus', 'Gælder', 'Pr', 'Nyt', 'Ikke', 'Flere', 'Skarp', 'Spar', 'Pris', 'Månedens'];
 //console.log('ordet: ', capital_words);
                 if (capital_words === null){
@@ -109,19 +109,26 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
 
                     // Stop when detect a number with a unit = compleat prodct_name, if end whit a number follows by ,-, the product_name is unfinneshed
 //console.log('start name: ',product_name_start);
-                    const product_name_match = product_name_start.match(/(.+?)\s(\d+(?:,\d+)?(?:-\d+(?:,\d+)?)?)\s?(g\.|kg\.|ml\.|cl\.|rl\.)/i);
+                    let product_name_match = product_name_start.match(/(.+?)\s(\d+(?:,\d+)?(?:x\d+)?(?:-\d+(?:,\d+)?)?)\s?(g|kg|ml|cl|rl|liter)/i);
+                    let product_name, amount, unit;
 //console.log('match product name: ',product_name_match);
                     if (!product_name_match) {
-                        const first_part_of_product_name = product_name_start.match(/(.+?)\s(\d+(?:,\d+)?)\s?,-/i);
-                        if(first_part_of_product_name){
-                            prev_product_name_found = false;
-                            console.log('Misssing some of name: ', first_part_of_product_name[1]);
+                        product_name_match = product_name_start.match(/(\p{Lu}[\p{L}\d\s\-]*)\s+Flere varianter/iu);
+console.log('Capital letter words:: ',product_name_match);
+                        if (!product_name_match){
+                            const first_part_of_product_name = product_name_start.match(/(.+?)\s(\d+(?:,\d+)?)\s?,-/i);
+                            if(first_part_of_product_name){
+                                prev_product_name_found = false;
+                                console.log('Misssing some of name: ', first_part_of_product_name[1]);
+                            }
                         }
                     }
                     if(product_name_match){
-                        let product_name = product_name_match[1].trimEnd();
-                        const amount = product_name_match[2].trimEnd();
-                        const unit = product_name_match[3].trimEnd();
+                        product_name = product_name_match[1].trimEnd();
+                        if(product_name_match[2] && product_name_match[3]){
+                            amount = product_name_match[2].trimEnd();
+                            unit = product_name_match[3].trimEnd();
+                        }
 
                         // Pålægsmarked
                         if(product_name[product_name.length-1] === '*'){
@@ -132,10 +139,10 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                             }
                         }
 
-                        // Drikkevaremarked
-                        if(product_name === 'Drikkevaremarked'){
+                        // Drikkevaremarked or Salling frostmarked
+                        if(product_name === 'Drikkevaremarked' || product_name === 'Salling frostmarked'){
                             for (let i = 0; i <= capital_words.length; i++){
-                                if(product_name === capital_words[i]){
+                                if(word_of_first_product === capital_words[i]){
                                     word_of_first_product = capital_words[i+1];
                                     break;
                                 }
@@ -151,8 +158,10 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                             }
                         }
                         
-                        console.log('Full name of the product: ', product_name);
-                        console.log('Amount and unit: ', amount, unit);
+                        console.log('Full name of the product: ', product_name.replace(/\s*eller\s*/g, ', '));
+                        if(product_name !== 'Øl- eller sodavandsmarked' && amount && unit){
+                            console.log('Amount and unit: ', amount, unit);
+                        }
                     }
                 }
 
@@ -185,7 +194,7 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                 // Find kg or L price
                 if(!prev_unit_price_found){
                     const unit_prices = ['Pr. kg max.', 'Pr. kg', 'Pr. liter max.', 'Pr. liter', 'Pr. stk.', 'Pr stk.'];
-console.log('Check if match found (before: ');
+//console.log('Check if match found (before: ');
                     for (let i = 0; i <= unit_prices.length; i++){
                         if(!product.includes(unit_prices[i])){
                             continue;
@@ -214,7 +223,7 @@ console.log('Check if match found (before: ');
                 }
 
 
-console.log('Status on unit_prices_found: ', unit_prices_found);
+//console.log('Status on unit_prices_found: ', unit_prices_found);
                 if (!unit_prices_found){
                     const unit_prices = ['Pr. kg max.', 'Pr. kg', 'Pr. liter max.', 'Pr. liter', 'Pr. stk.', 'Pr stk.'];
                     for (let i = 0; i <= unit_prices.length; i++){
