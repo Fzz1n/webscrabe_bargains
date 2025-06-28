@@ -48,15 +48,17 @@ async function scrape_images(pageUrl){
             filtered.forEach(product => {
                 // Get the first word of the product name
                 let capital_words = product.match(/\p{Lu}\p{L}*/gu);
-                const unusable_words = ['Plus', 'Gælder', 'Pr', 'Nyt', 'Ikke', 'Flere', 'Skarp', 'Spar', 'Pris', 'Månedens'];
+                const unusable_words = new Set(['Plus', 'Gælder', 'Pr', 'Nyt', 'Ikke', 'Flere', 'Skarp', 'Spar', 'Pris', 'Månedens', 'Søndagspris', 'Hybrid', 'PFAS', 'FRI', 'Grillhygge', 'Sommeraften', 'Inspiration', 'Stort', 'Husk', 'Min']);
 //console.log('ordet: ', capital_words);
-                if (capital_words === null){
-                    capital_words = 0;
-                }
                 let word_of_first_product = null;
-                for(let i = 0; i < capital_words.length; i++){
+
+                if (capital_words !== null){
+                    word_of_first_product = capital_words.find(word => !unusable_words.has(word) && word.length <= 20);
+                }
+                //console.log('first word:',word_of_first_product);
+                /*for(let i = 0; i < capital_words.length; i++){
                     for(let j = 0; j < unusable_words.length; j++){
-                        if (capital_words[i] === unusable_words[j]){
+                        if (capital_words[i] === unusable_words[j] || capital_words[i].length > 20){ // MAX limit "20" carecter for first word
                             word_of_first_product = null;
 //console.log('fjerner elemetet, nu:', word_of_first_product);
                             break;
@@ -69,7 +71,7 @@ async function scrape_images(pageUrl){
                     if (word_of_first_product){
                         break;
                     }
-                }
+                }*/
 //console.log('tilbud på siden: ', word_of_first_product);
 
                 // Fill in the rest of the product name
@@ -108,25 +110,40 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                     }
 
                     // Stop when detect a number with a unit = compleat prodct_name, if end whit a number follows by ,-, the product_name is unfinneshed
-//console.log('start name: ',product_name_start);
-                    let product_name_match = product_name_start.match(/(.+?)\s(\d+(?:,\d+)?(?:x\d+)?(?:-\d+(?:,\d+)?)?)\s?(g|kg|ml|cl|rl|liter)/i);
+//console.log('start name: ',capital_words);
+                    let product_name_match = product_name_start.match(/(.+?)\s(\d+(?:,\d+)?(?:x\d+)?(?:-\d+(?:,\d+)?)?)\s?(g|kg|ml|cl|rl|liter|stk)/i);
                     let product_name, amount, unit;
-//console.log('match product name: ',product_name_match);
                     if (!product_name_match) {
-                        product_name_match = product_name_start.match(/(\p{Lu}[\p{L}\d\s\-]*)\s+Flere varianter/iu);
-console.log('Capital letter words:: ',product_name_match);
+                        product_name_match = product_name_start.match(/^(.+?)\s+Flere/i); // Stop at "Flere"
                         if (!product_name_match){
-                            const first_part_of_product_name = product_name_start.match(/(.+?)\s(\d+(?:,\d+)?)\s?,-/i);
-                            if(first_part_of_product_name){
-                                prev_product_name_found = false;
-                                console.log('Misssing some of name: ', first_part_of_product_name[1]);
+//console.log('match product name: ',product_name_start);
+                            product_name_match = product_name_start.match(/^((?:\b\p{L}+\b\s+)*)(\b\p{L}+\b)\s+\2\b/iu); // Dublicate of words
+                            if(!product_name_match){
+                                product_name_match = product_name_start.match(/(\p{Lu}[\p{L}\d\s\-]*)\s+Med/iu); // Stop at "Med"
+                                if(!product_name_match){
+                                    product_name_match = product_name_start.match(/^(.+?)\s+([A-Z0-9]{1,4}(?:-[A-Z0-9]{1,4})?)\./i); // Clothes size eg. XS-XXL
+//console.log('Check med navnet gentagelse: ',product_name_match);
+                                    if(!product_name_match){
+                                        const first_part_of_product_name = product_name_start.match(/(.+?)\s(\d+(?:,\d+)?)\s?,-/i);
+                                        if(first_part_of_product_name){
+                                            prev_product_name_found = false;
+                                            console.log('Misssing some of name: ', first_part_of_product_name[1]);
+                                        }
+                                    }
+                                }
+                            } else {
+                                product_name = product_name_match[1] + product_name_match[2];
                             }
                         }
                     }
                     if(product_name_match){
-                        product_name = product_name_match[1].trimEnd();
-                        if(product_name_match[2] && product_name_match[3]){
-                            amount = product_name_match[2].trimEnd();
+                        if(!product_name){
+                            product_name = product_name_match[1].trimEnd();
+                            if(product_name_match[2] && !unusable_words.has(product_name_match[2])){
+                                amount = product_name_match[2].trimEnd();
+                            }
+                        }
+                        if(product_name_match[3]){
                             unit = product_name_match[3].trimEnd();
                         }
 
@@ -140,14 +157,20 @@ console.log('Capital letter words:: ',product_name_match);
                         }
 
                         // Drikkevaremarked or Salling frostmarked
-                        if(product_name === 'Drikkevaremarked' || product_name === 'Salling frostmarked'){
+                        if(product_name === 'Drikkevaremarked' || product_name === 'Salling frostmarked' || product_name.includes('Frugtmarked')){
+console.log(capital_words, word_of_first_product);
                             for (let i = 0; i <= capital_words.length; i++){
                                 if(word_of_first_product === capital_words[i]){
-                                    word_of_first_product = capital_words[i+1];
+                                    for(let j = i + 1; j < i + 4 && j < capital_words.length; j++){
+                                        if(!unusable_words.has(capital_words[j])){
+                                            word_of_first_product = capital_words[j];
+                                            break;
+                                        }
+                                    }
                                     break;
                                 }
                             }
-//console.log('new first word: ',word_of_first_product);
+console.log('new first word: ',word_of_first_product);
                             const index_of_word = product.indexOf(word_of_first_product);
                             const product_name_start = product.slice(index_of_word);
                             const product_name_match = product_name_start.match(/^.*?(?=\.)/);
@@ -159,8 +182,12 @@ console.log('Capital letter words:: ',product_name_match);
                         }
                         
                         console.log('Full name of the product: ', product_name.replace(/\s*eller\s*/g, ', '));
-                        if(product_name !== 'Øl- eller sodavandsmarked' && amount && unit){
-                            console.log('Amount and unit: ', amount, unit);
+                        if(product_name !== 'Øl- eller sodavandsmarked' && amount !== undefined){
+                            if(unit === undefined){
+                                console.log('Amount: ', amount);
+                            } else {
+                                console.log('Amount and unit: ', amount, unit);
+                            }
                         }
                     }
                 }
@@ -173,7 +200,7 @@ console.log('Capital letter words:: ',product_name_match);
                     const end_price_index = product.indexOf(',-');
                     const space_index = product.lastIndexOf(" ", end_price_index);
                     price = product.slice(space_index+1, end_price_index);
-                    const before_price = product.slice(0/*space_index - 'liter max.'.length*/, space_index);
+                    const before_price = product.slice(space_index - 15, space_index);
 //console.log('before_price: ', before_price);
                     if(/(Pr\.?\s?(kg|kg max\.|liter|liter max\.|stk|stk\.|til))[^0-9]*$/i.test(before_price)){
 //console.log('status on unwanted: ', /(Pr\.?\s?(kg|kg max\.|liter|liter max\.|stk|stk\.|til))[^0-9]*$/i.test(before_price));
@@ -182,7 +209,7 @@ console.log('Capital letter words:: ',product_name_match);
                         price_found = true;
                     }
 //console.log('Prisen på grisen: ', price);
-                    if(price !== 0 && price_found){
+                    if(price !== 0 && price_found && price.length < 10){
                         console.log('price: ', price);
                         if (word_of_first_product === null){
                             //prev_found_price = true;
