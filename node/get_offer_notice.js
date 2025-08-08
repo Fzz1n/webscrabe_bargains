@@ -4,9 +4,9 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 
-async function scrape_images(pageUrl){
+async function scrape_offers(page_url){
     try {
-        const res = await axios.get(pageUrl);
+        const res = await axios.get(page_url);
         const $ = cheerio.load(res.data);
 
         // Find "window.staticSettings = { ... }" in the HTML 
@@ -26,6 +26,18 @@ async function scrape_images(pageUrl){
         let unit_prices_found = false;
         let prev_unit_price_found = true;
         let prev_product_name_found = true;
+
+        const all_offers = {
+            name: [],
+            amount: [],
+            unit: [],
+            unit_to_price: [],
+            unit_price: [],
+            price: []
+        };
+
+        let product_num = 0;
+
         page_texts.forEach(page => {
             const corrected_prices = page.replace(/(\d+) 95 /g, '$1,95,- ');
             const product = corrected_prices.split(/(?<=,-)|Avisen gælder/);
@@ -42,7 +54,7 @@ async function scrape_images(pageUrl){
                     .replace(/\s{2,}/g, ' ')
                 );*/
             
-            console.log(filtered);
+            //console.log(filtered);
 
             
             filtered.forEach(product => {
@@ -74,6 +86,8 @@ async function scrape_images(pageUrl){
                 }*/
 //console.log('tilbud på siden: ', word_of_first_product);
 
+                product_num++;
+
                 // Fill in the rest of the product name
                 if (word_of_first_product){/*
                     if(prev_found_price) {
@@ -104,30 +118,41 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                             const rest_product_name = rest_product_name_match[1].trim();
                             const amount = rest_product_name_match[2].trimEnd();
                             const unit = rest_product_name_match[3].trimEnd(); 
-                            console.log('rest_of_propduct_name: ', rest_product_name);
-                            console.log('Amount and unit: ', amount, unit);
+                            //console.log('rest_of_propduct_name: ', rest_product_name);
+                            //console.log('Amount and unit: ', amount, unit);
+                            const index_prev_name = all_offers.name.length - 1;
+                            all_offers.name[index_prev_name] += " " + rest_product_name;
+                            temp_unit = unit;
+                            temp_amount = amount;
+                            all_offers.unit[product_num] = unit;
+                            all_offers.amount[product_num] = amount;
                         }
                     }
 
                     // Stop when detect a number with a unit = compleat prodct_name, if end whit a number follows by ,-, the product_name is unfinneshed
 //console.log('start name: ',capital_words);
                     let product_name_match = product_name_start.match(/(.+?)\s(\d+(?:,\d+)?(?:x\d+)?(?:-\d+(?:,\d+)?)?)\s?(g|kg|ml|cl|rl|liter|stk)/i);
-                    let product_name, amount, unit;
+                    let product_name, amount, unit, filter_name = 'Normal';
                     if (!product_name_match) {
-                        product_name_match = product_name_start.match(/^(.+?)\s+Flere/i); // Stop at "Flere"
+                        product_name_match = product_name_start.match(/^(.+?)\s+([A-Z0-9]{1,4}(?:-[A-Z0-9]{1,4})?)\./i); // Clothes size eg. XS-XXL
+                        filter_name = 'Clothes size';
                         if (!product_name_match){
 //console.log('match product name: ',product_name_start);
                             product_name_match = product_name_start.match(/^((?:\b\p{L}+\b\s+)*)(\b\p{L}+\b)\s+\2\b/iu); // Dublicate of words
+                            filter_name = '2x words';
                             if(!product_name_match){
                                 product_name_match = product_name_start.match(/(\p{Lu}[\p{L}\d\s\-]*)\s+Med/iu); // Stop at "Med"
+                                filter_name = 'Stop at "Med"';
                                 if(!product_name_match){
-                                    product_name_match = product_name_start.match(/^(.+?)\s+([A-Z0-9]{1,4}(?:-[A-Z0-9]{1,4})?)\./i); // Clothes size eg. XS-XXL
+                                    product_name_match = product_name_start.match(/^(.+?)\s+Flere/i); // Stop at "Flere"
+                                    filter_name = 'Stop at "Flere"';
 //console.log('Check med navnet gentagelse: ',product_name_match);
                                     if(!product_name_match){
                                         const first_part_of_product_name = product_name_start.match(/(.+?)\s(\d+(?:,\d+)?)\s?,-/i);
                                         if(first_part_of_product_name){
                                             prev_product_name_found = false;
-                                            console.log('Misssing some of name: ', first_part_of_product_name[1]);
+                                            //console.log('Misssing some of name: ', first_part_of_product_name[1]);
+                                            all_offers.name[product_num] = first_part_of_product_name[1];
                                         }
                                     }
                                 }
@@ -137,6 +162,7 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                         }
                     }
                     if(product_name_match){
+//console.log('Chosen Filter: ', filter_name);
                         if(!product_name){
                             product_name = product_name_match[1].trimEnd();
                             if(product_name_match[2] && !unusable_words.has(product_name_match[2])){
@@ -149,7 +175,7 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
 
                         // Pålægsmarked
                         if(product_name[product_name.length-1] === '*'){
-                            console.log('product_name ends on a star (*)');
+                            //console.log('product_name ends on a star (*)');
                             const new_product_name = product_name.match(/\b[A-ZÆØÅÖÜ][a-zæøåöüA-ZÆØÅÖÜ]*\b/g);
                             if(new_product_name){
                                 product_name = new_product_name[1];
@@ -158,7 +184,7 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
 
                         // Drikkevaremarked or Salling frostmarked
                         if(product_name === 'Drikkevaremarked' || product_name === 'Salling frostmarked' || product_name.includes('Frugtmarked')){
-console.log(capital_words, word_of_first_product);
+//console.log(capital_words, word_of_first_product);
                             for (let i = 0; i <= capital_words.length; i++){
                                 if(word_of_first_product === capital_words[i]){
                                     for(let j = i + 1; j < i + 4 && j < capital_words.length; j++){
@@ -170,7 +196,7 @@ console.log(capital_words, word_of_first_product);
                                     break;
                                 }
                             }
-console.log('new first word: ',word_of_first_product);
+//console.log('new first word: ',word_of_first_product);
                             const index_of_word = product.indexOf(word_of_first_product);
                             const product_name_start = product.slice(index_of_word);
                             const product_name_match = product_name_start.match(/^.*?(?=\.)/);
@@ -181,13 +207,16 @@ console.log('new first word: ',word_of_first_product);
                             }
                         }
                         
-                        console.log('Full name of the product: ', product_name.replace(/\s*eller\s*/g, ', '));
+                        //console.log('Full name of the product: ', product_name.replace(/\s*eller\s*/g, ', '));
+                        all_offers.name[product_num] = product_name.replace(/\s*eller\s*/g, ', ');
                         if(product_name !== 'Øl- eller sodavandsmarked' && amount !== undefined){
                             if(unit === undefined){
-                                console.log('Amount: ', amount);
+                                //console.log('Amount: ', amount);
                             } else {
-                                console.log('Amount and unit: ', amount, unit);
+                                //console.log('Amount and unit: ', amount, unit);
+                                all_offers.unit[product_num] = unit;
                             }
+                            all_offers.amount[product_num] = amount;
                         }
                     }
                 }
@@ -210,7 +239,8 @@ console.log('new first word: ',word_of_first_product);
                     }
 //console.log('Prisen på grisen: ', price);
                     if(price !== 0 && price_found && price.length < 10){
-                        console.log('price: ', price);
+                        //console.log('price: ', price);
+                        all_offers.price[product_num] = Number(price);
                         if (word_of_first_product === null){
                             //prev_found_price = true;
 //console.log('Setting prev_found_price till: true');
@@ -243,7 +273,12 @@ console.log('new first word: ',word_of_first_product);
 //console.log(match_price);
                             prev_unit_price_found = true;
                             let price = match_price[0].trimStart();
-                            console.log(unit_to_price, ': ', price);
+                            //console.log(unit_to_price, ': ', price);
+
+                            const index_prev_unit_to_price = all_offers.unit_to_price.length - 1;
+                            const index_prev_unit_price = all_offers.unit_price.length - 1;
+                            all_offers.unit_to_price[index_prev_unit_to_price] = unit_to_price;
+                            all_offers.unit_price[index_prev_unit_price] = price;
                             break;
                         }
                     }
@@ -280,7 +315,9 @@ console.log('new first word: ',word_of_first_product);
 //console.log(match_price);
                             unit_prices_found = true;
                             let price = match_price[0].trimStart();
-                            console.log(unit_to_price, ': ', price);
+                            //console.log(unit_to_price, ': ', price);
+                            all_offers.unit_to_price[product_num] = unit_to_price;
+                            all_offers.unit_price[product_num] = price;
                             break;
                         }
                     }
@@ -292,11 +329,28 @@ console.log('new first word: ',word_of_first_product);
 
 
         });
-        
+
+        /*
+        for(let i = 0; i < all_offers.name.length; i++){
+            
+            if(all_offers.name[i] !== undefined){
+                console.log('Offer ' + (i + 1) + ':');
+                
+                for (let key in all_offers) {
+                    console.log(`  ${key}: ${all_offers[key][i]}`);
+                }
+
+                console.log('-----------');
+            }
+        }*/
+
+        // Insert in DB
+        return all_offers;
 
     } catch (error) {
         console.error(error);
     }
 };
 
-scrape_images('https://avis.foetex.dk/naeste-uges-avis/'); // Replace with the URL of the site you want to scrape
+export { scrape_offers };
+//scrape_offers('https://avis.foetex.dk/naeste-uges-avis/'); // Replace with the URL of the site you want to scrape
