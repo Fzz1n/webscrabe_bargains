@@ -122,8 +122,8 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                             //console.log('Amount and unit: ', amount, unit);
                             const index_prev_name = all_offers.name.length - 1;
                             all_offers.name[index_prev_name] += " " + rest_product_name;
-                            temp_unit = unit;
-                            temp_amount = amount;
+                            //temp_unit = unit;
+                            //temp_amount = amount;
                             all_offers.unit[product_num] = unit;
                             all_offers.amount[product_num] = amount;
                         }

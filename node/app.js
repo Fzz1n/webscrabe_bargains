@@ -1,1 +1,0 @@
-const server = import("./server.js");// This runs the server

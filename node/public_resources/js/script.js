@@ -16,10 +16,11 @@ async function get_offers(){
     });
 
     document.getElementById('send_wish_req').addEventListener('click', () => {
+        document.getElementById("send_wish_req").disabled=true;
         let invalid_input_found = false;
         let wish_list = [];
         // Array fields
-        document.querySelectorAll('#array_data_table input').forEach(input => {
+        document.querySelectorAll('#wishlist_products_id input').forEach(input => {
             const field = input.dataset.field;
             const index = input.dataset.index;
             const value = input.value.trim();
@@ -28,7 +29,7 @@ async function get_offers(){
             if (value !== '' && isNaN(value)) {
                 if(!is_valid_input(value)) {
                     invalid_input_found = true;
-                alert(`Invalid input in the field: ${field} ${index + 1}. Only letters, numbers, commas, minus and periods are allowed.`);
+                    alert(`Invalid input in the field: ${field} ${index + 1}. Only letters, numbers, commas, minus and periods are allowed.`);
                 } else {
                     wish_list.push(value);
                     console.log(`Value: ${index} is, ${value}`);
@@ -46,14 +47,40 @@ async function get_offers(){
             // Show a success message, when saved
             alert("Data saved!");
         }*/
+        const table_body = document.querySelector('#result_id tbody');
+        table_body.innerHTML = ''; // Clear previous data
 
         for (let i = 0; i < wish_list.length; i++){
             let product_found = false;
 
             for (let j = 0; j < offers.length; j++){
                 if(wish_list[i].toLowerCase() === offers[j].name.toLowerCase()){
-                    product_found = true
-                    console.log(`${wish_list[i]}: blev fundet i tilbuds avisen, til ${offers[j].price}`);
+                    product_found = true;
+                    
+                    // Create row and cells
+                    const row = document.createElement('tr');
+
+                    // Name
+                    const td_name = document.createElement('td');
+                    td_name.textContent = offers[j].name;
+                    row.appendChild(td_name);
+
+                    // Price
+                    const td_price = document.createElement('td');
+                    td_price.textContent = offers[j].price;
+                    row.appendChild(td_price);
+
+                    // Amount
+                    const td_amount = document.createElement('td');
+                    td_amount.textContent = offers[j].amount + offers[j].unit;
+                    row.appendChild(td_amount);
+
+                    // Unit Price
+                    const td_unit_price = document.createElement('td');
+                    td_unit_price.textContent = offers[j].unit_price + offers[j].unit_to_price;
+                    row.appendChild(td_unit_price);
+                    
+                    table_body.appendChild(row);
                     break;
                 }
             }
@@ -62,7 +89,9 @@ async function get_offers(){
                 console.log(`${wish_list[i]}: blev ikke fundet`)
             }
         }
-        
+
+        document.getElementById("result_id").style.visibility = "visible";
+        document.getElementById("send_wish_req").disabled = false;
     });
 
 };
