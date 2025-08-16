@@ -1,7 +1,7 @@
 async function get_offers(){
     let offers;
     document.getElementById('get_offers').addEventListener('click', async () => {
-
+        document.getElementById("get_offers").disabled = true;
         // Save data via scrape
         const save_res = await fetch('/api/offers/save');
         const save_data = await save_res.json();
@@ -13,10 +13,11 @@ async function get_offers(){
 
         console.log('Antal tilbud fundet:', offers.length);
         console.log('Tilbud hentet fra DB:', offers);
+        document.getElementById("get_offers").disabled = false;
     });
 
     document.getElementById('send_wish_req').addEventListener('click', () => {
-        document.getElementById("send_wish_req").disabled=true;
+        document.getElementById("send_wish_req").disabled = true;
         let invalid_input_found = false;
         let wish_list = [];
         // Array fields
@@ -32,7 +33,6 @@ async function get_offers(){
                     alert(`Invalid input in the field: ${field} ${index + 1}. Only letters, numbers, commas, minus and periods are allowed.`);
                 } else {
                     wish_list.push(value);
-                    console.log(`Value: ${index} is, ${value}`);
                 }
             }
         });
@@ -65,9 +65,15 @@ async function get_offers(){
                     td_name.textContent = offers[j].name;
                     row.appendChild(td_name);
 
-                    // Price
+                    // Price 
                     const td_price = document.createElement('td');
-                    td_price.textContent = offers[j].price;
+                    // If not definded calc: "unit_price" / 1000 * smallest amount from "amount"
+                    if(offers[j].price === null){
+                        const min_amount = offers[j].amount.match(/^\d+/);
+                        td_price.textContent = offers[j].unit_price / 1000 * min_amount[0];
+                    } else {
+                        td_price.textContent = offers[j].price;
+                    }
                     row.appendChild(td_price);
 
                     // Amount
