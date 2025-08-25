@@ -1,21 +1,4 @@
-async function get_offers(){
-    let offers;
-    document.getElementById('get_offers').addEventListener('click', async () => {
-        document.getElementById("get_offers").disabled = true;
-        // Save data via scrape
-        const save_res = await fetch('/api/offers/save');
-        const save_data = await save_res.json();
-        console.log(save_data.message);
-
-        // Get data from DB
-        const offers_raw = await fetch('/api/offers');
-        offers = await offers_raw.json();
-
-        console.log('Antal tilbud fundet:', offers.length);
-        console.log('Tilbud hentet fra DB:', offers);
-        document.getElementById("get_offers").disabled = false;
-    });
-
+async function get_offers(offers){
     document.getElementById('send_wish_req').addEventListener('click', () => {
         document.getElementById("send_wish_req").disabled = true;
         let invalid_input_found = false;
@@ -50,11 +33,12 @@ async function get_offers(){
         const table_body = document.querySelector('#result_id tbody');
         table_body.innerHTML = ''; // Clear previous data
 
+        // Find the items from wishlist from the offers
         for (let i = 0; i < wish_list.length; i++){
             let product_found = false;
 
             for (let j = 0; j < offers.length; j++){
-                if(wish_list[i].toLowerCase() === offers[j].name.toLowerCase()){
+                if(offers[j].name.toLowerCase().includes(wish_list[i].toLowerCase())){
                     product_found = true;
                     
                     // Create row and cells
@@ -70,7 +54,7 @@ async function get_offers(){
                     // If not definded calc: "unit_price" / 1000 * smallest amount from "amount"
                     if(offers[j].price === null){
                         const min_amount = offers[j].amount.match(/^\d+/);
-                        td_price.textContent = offers[j].unit_price / 1000 * min_amount[0];
+                        td_price.textContent = parseInt(offers[j].unit_price / 1000 * min_amount[0]);
                     } else {
                         td_price.textContent = offers[j].price;
                     }
@@ -83,7 +67,7 @@ async function get_offers(){
 
                     // Unit Price
                     const td_unit_price = document.createElement('td');
-                    td_unit_price.textContent = offers[j].unit_price + offers[j].unit_to_price;
+                    td_unit_price.textContent = offers[j].unit_price.toString().replace('.', ',') + ' ' + offers[j].unit_to_price;
                     row.appendChild(td_unit_price);
                     
                     table_body.appendChild(row);
@@ -107,6 +91,12 @@ function is_valid_input(value) {
     return regex.test(value);
 }
 
-window.addEventListener('pageshow', () => {
-    get_offers();
+window.addEventListener('pageshow', async () => {
+    // Get offers
+    const offers_raw = await fetch('/api/offers');
+    const offers = await offers_raw.json();
+    console.log('Number of offers:', offers.length);
+    console.log('Offer retrieved from DB:', offers);
+
+    get_offers(offers);
 });

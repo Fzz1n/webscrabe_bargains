@@ -36,7 +36,7 @@ async function scrape_offers(page_url){
             price: []
         };
 
-        let product_num = 0;
+        let product_num = -1;
 
         page_texts.forEach(page => {
             const corrected_prices = page.replace(/(\d+) 95 /g, '$1,95,- ');
@@ -86,10 +86,10 @@ async function scrape_offers(page_url){
                 }*/
 //console.log('tilbud på siden: ', word_of_first_product);
 
-                product_num++;
-
                 // Fill in the rest of the product name
-                if (word_of_first_product){/*
+                if (word_of_first_product){
+                    product_num++;
+                    /*
                     if(prev_found_price) {
 console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                         price_found = true;
@@ -240,7 +240,7 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
 //console.log('Prisen på grisen: ', price);
                     if(price !== 0 && price_found && price.length < 10){
                         //console.log('price: ', price);
-                        all_offers.price[product_num] = Number(price);
+                        all_offers.price[product_num] = Number(price.replace(',', '.'));
                         if (word_of_first_product === null){
                             //prev_found_price = true;
 //console.log('Setting prev_found_price till: true');
@@ -278,7 +278,7 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                             const index_prev_unit_to_price = all_offers.unit_to_price.length - 1;
                             const index_prev_unit_price = all_offers.unit_price.length - 1;
                             all_offers.unit_to_price[index_prev_unit_to_price] = unit_to_price;
-                            all_offers.unit_price[index_prev_unit_price] = price;
+                            all_offers.unit_price[index_prev_unit_price] = price.replace(',', '.');
                             break;
                         }
                     }
@@ -317,34 +317,16 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                             let price = match_price[0].trimStart();
                             //console.log(unit_to_price, ': ', price);
                             all_offers.unit_to_price[product_num] = unit_to_price;
-                            all_offers.unit_price[product_num] = price;
+                            all_offers.unit_price[product_num] = price.replace(',', '.');
                             break;
                         }
                     }
                 }
-
-                
-
             });
-
-
         });
 
-        /*
-        for(let i = 0; i < all_offers.name.length; i++){
-            
-            if(all_offers.name[i] !== undefined){
-                console.log('Offer ' + (i + 1) + ':');
-                
-                for (let key in all_offers) {
-                    console.log(`  ${key}: ${all_offers[key][i]}`);
-                }
-
-                console.log('-----------');
-            }
-        }*/
-
         // Insert in DB
+        console.log('Number of offers:', all_offers.name.length);
         return all_offers;
 
     } catch (error) {

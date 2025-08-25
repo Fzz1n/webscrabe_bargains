@@ -39,13 +39,12 @@ async function save_offers_to_DB(shop){
         `);
 
         db.run(`DELETE FROM offers`); // Delete existing rows
+        db.run(`DELETE FROM sqlite_sequence WHERE name='offers'`); // Reset ID 
 
         const insert_stmt = db.prepare (`
             INSERT INTO offers (name, amount, unit, unit_to_price, unit_price, price)
             VALUES (?, ?, ?, ?, ?, ?)
         `);
-
-        console.log('Antal tilbud fundet:', offers.name.length);
 
         for(let i = 0; i < offers.name.length; i++){
             if (offers.name[i] !== undefined) {
