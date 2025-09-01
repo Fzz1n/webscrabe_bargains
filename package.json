@@ -2,7 +2,7 @@
   "name": "nodeweb2-server",
   "version": "1.0.0",
   "description": "TestApp",
-  "main": "app.js",
+  "main": "node/server.js",
   "type": "module",
   "dependencies": {
     "axios": "^1.9.0",
@@ -19,7 +19,8 @@
     "eslint": "^7.21.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node node/server.js"
   },
   "author": "",
   "license": "ISC"

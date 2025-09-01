@@ -1,12 +1,7 @@
-# TO DO
-back end:
-    webscrabe 'https://avis.foetex.dk/naeste-uges-avis/' with cheerio
-    filter: 
-        name, 
-        price,
-        "kg/str." price
-    store in a database
-front end:
-    creat a 'wish list'
-    search the database if an item exist from the 'wish list'
-    return the matching item(s) and teh price
+# Bargain hunter
+The program webscrabe bargains from Føtex at [https://avis.foetex.dk/naeste-uges-avis/](https://avis.foetex.dk/naeste-uges-avis/) and stores the data in a DB.
+
+Users can search directly from the homepage, and if the product is found, the program returns the corresponding price, amount, and unit price.
+
+## To run the program
+Run `server.js` or visit [https://webscrabe-bargains.onrender.com/](https://webscrabe-bargains.onrender.com/)
