@@ -5,7 +5,7 @@ import sqlite3 from 'sqlite3';
 import routes from './routes/bargains.js';  // Import the routes
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Get the directory path of the current file (server.js)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
