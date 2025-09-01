@@ -4,7 +4,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 
-async function scrape_offers(page_url){
+async function scrape_bargains(page_url){
     try {
         const res = await axios.get(page_url);
         const $ = cheerio.load(res.data);
@@ -27,7 +27,7 @@ async function scrape_offers(page_url){
         let prev_unit_price_found = true;
         let prev_product_name_found = true;
 
-        const all_offers = {
+        const all_bargains = {
             name: [],
             amount: [],
             unit: [],
@@ -120,12 +120,12 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                             const unit = rest_product_name_match[3].trimEnd(); 
                             //console.log('rest_of_propduct_name: ', rest_product_name);
                             //console.log('Amount and unit: ', amount, unit);
-                            const index_prev_name = all_offers.name.length - 1;
-                            all_offers.name[index_prev_name] += " " + rest_product_name;
+                            const index_prev_name = all_bargains.name.length - 1;
+                            all_bargains.name[index_prev_name] += " " + rest_product_name;
                             //temp_unit = unit;
                             //temp_amount = amount;
-                            all_offers.unit[product_num] = unit;
-                            all_offers.amount[product_num] = amount;
+                            all_bargains.unit[product_num] = unit;
+                            all_bargains.amount[product_num] = amount;
                         }
                     }
 
@@ -152,7 +152,7 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                                         if(first_part_of_product_name){
                                             prev_product_name_found = false;
                                             //console.log('Misssing some of name: ', first_part_of_product_name[1]);
-                                            all_offers.name[product_num] = first_part_of_product_name[1];
+                                            all_bargains.name[product_num] = first_part_of_product_name[1];
                                         }
                                     }
                                 }
@@ -208,15 +208,15 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                         }
                         
                         //console.log('Full name of the product: ', product_name.replace(/\s*eller\s*/g, ', '));
-                        all_offers.name[product_num] = product_name.replace(/\s*eller\s*/g, ', ');
+                        all_bargains.name[product_num] = product_name.replace(/\s*eller\s*/g, ', ');
                         if(product_name !== 'Øl- eller sodavandsmarked' && amount !== undefined){
                             if(unit === undefined){
                                 //console.log('Amount: ', amount);
                             } else {
                                 //console.log('Amount and unit: ', amount, unit);
-                                all_offers.unit[product_num] = unit;
+                                all_bargains.unit[product_num] = unit;
                             }
-                            all_offers.amount[product_num] = amount;
+                            all_bargains.amount[product_num] = amount;
                         }
                     }
                 }
@@ -240,7 +240,7 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
 //console.log('Prisen på grisen: ', price);
                     if(price !== 0 && price_found && price.length < 10){
                         //console.log('price: ', price);
-                        all_offers.price[product_num] = Number(price.replace(',', '.'));
+                        all_bargains.price[product_num] = Number(price.replace(',', '.'));
                         if (word_of_first_product === null){
                             //prev_found_price = true;
 //console.log('Setting prev_found_price till: true');
@@ -275,10 +275,10 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                             let price = match_price[0].trimStart();
                             //console.log(unit_to_price, ': ', price);
 
-                            const index_prev_unit_to_price = all_offers.unit_to_price.length - 1;
-                            const index_prev_unit_price = all_offers.unit_price.length - 1;
-                            all_offers.unit_to_price[index_prev_unit_to_price] = unit_to_price;
-                            all_offers.unit_price[index_prev_unit_price] = price.replace(',', '.');
+                            const index_prev_unit_to_price = all_bargains.unit_to_price.length - 1;
+                            const index_prev_unit_price = all_bargains.unit_price.length - 1;
+                            all_bargains.unit_to_price[index_prev_unit_to_price] = unit_to_price;
+                            all_bargains.unit_price[index_prev_unit_price] = price.replace(',', '.');
                             break;
                         }
                     }
@@ -316,8 +316,8 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
                             unit_prices_found = true;
                             let price = match_price[0].trimStart();
                             //console.log(unit_to_price, ': ', price);
-                            all_offers.unit_to_price[product_num] = unit_to_price;
-                            all_offers.unit_price[product_num] = price.replace(',', '.');
+                            all_bargains.unit_to_price[product_num] = unit_to_price;
+                            all_bargains.unit_price[product_num] = price.replace(',', '.');
                             break;
                         }
                     }
@@ -326,13 +326,13 @@ console.log('sætter til "true" pga. prev_found_price er: ', prev_found_price);
         });
 
         // Insert in DB
-        console.log('Number of offers:', all_offers.name.length);
-        return all_offers;
+        console.log('Number of bargains:', all_bargains.name.length);
+        return all_bargains;
 
     } catch (error) {
         console.error(error);
     }
 };
 
-export { scrape_offers };
-//scrape_offers('https://avis.foetex.dk/naeste-uges-avis/'); // Replace with the URL of the site you want to scrape
+export { scrape_bargains };
+//scrape_bargains('https://avis.foetex.dk/naeste-uges-avis/'); // Replace with the URL of the site you want to scrape

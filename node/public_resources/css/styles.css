@@ -1,3 +1,13 @@
+/* Root colors for consistency */
+:root {
+  --primary-color: #4CAF50;
+  --primary-hover: #409643;
+  --text-color: #333;
+  --background-color: #f9f9f9;
+  --border-color: #ddd;
+  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 body {
     font-family: Arial, sans-serif;
     text-align: center;
@@ -5,5 +15,74 @@ body {
 }
 
 h1 {
-    color: #4CAF50;
+    color: var(--primary-color);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+  background: white;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+thead {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+th, td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+tbody tr:hover {
+  background-color: #f5faff;
+}
+
+.placeholder-row td {
+  background: transparent;
+  border: none;
+  height: 50px;
+}
+
+/* Button */
+
+button#send_wish_req {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  margin-right: 10px;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgb(0 123 255 / 0.6);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+button#send_wish_req:hover {
+  background-color: var(--primary-hover);
+  box-shadow: 0 4px 12px rgb(0 86 179 / 0.8);
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  body {
+    margin: 10px;
+  }
+
+  th, td {
+    padding: 10px 8px;
+  }
+
+  button#send_wish_req {
+    width: 100%;
+    margin-bottom: 10px;
+  }
 }

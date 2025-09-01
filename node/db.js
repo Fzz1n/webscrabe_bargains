@@ -1,4 +1,4 @@
-import { scrape_offers } from './get_offer_notice.js';
+import { scrape_bargains } from './get_bargains_notice.js';
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,12 +8,12 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = path.join(__dirname, 'databases/offers.db');
+const dbPath = path.join(__dirname, 'databases/bargains.db');
 
-async function save_offers_to_DB(shop){
-    let offers;
+async function save_bargains_to_DB(shop){
+    let bargains;
     if(shop === 'foetex'){
-        offers = await scrape_offers(`https://avis.foetex.dk/naeste-uges-avis/`);
+        bargains = await scrape_bargains(`https://avis.foetex.dk/naeste-uges-avis/`);
     } else {
         console.error('Unknown shop:', shop);
         return;
@@ -27,7 +27,7 @@ async function save_offers_to_DB(shop){
     
     db.serialize(() => {
         db.run(`
-            CREATE TABLE IF NOT EXISTS offers (
+            CREATE TABLE IF NOT EXISTS bargains (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT,
                 amount INTEGER,
@@ -38,23 +38,23 @@ async function save_offers_to_DB(shop){
             )
         `);
 
-        db.run(`DELETE FROM offers`); // Delete existing rows
-        db.run(`DELETE FROM sqlite_sequence WHERE name='offers'`); // Reset ID 
+        db.run(`DELETE FROM bargains`); // Delete existing rows
+        db.run(`DELETE FROM sqlite_sequence WHERE name='bargains'`); // Reset ID 
 
         const insert_stmt = db.prepare (`
-            INSERT INTO offers (name, amount, unit, unit_to_price, unit_price, price)
+            INSERT INTO bargains (name, amount, unit, unit_to_price, unit_price, price)
             VALUES (?, ?, ?, ?, ?, ?)
         `);
 
-        for(let i = 0; i < offers.name.length; i++){
-            if (offers.name[i] !== undefined) {
+        for(let i = 0; i < bargains.name.length; i++){
+            if (bargains.name[i] !== undefined) {
                 insert_stmt.run([
-                    offers.name[i],
-                    offers.amount[i],
-                    offers.unit[i],
-                    offers.unit_to_price[i],
-                    offers.unit_price[i],
-                    offers.price[i]
+                    bargains.name[i],
+                    bargains.amount[i],
+                    bargains.unit[i],
+                    bargains.unit_to_price[i],
+                    bargains.unit_price[i],
+                    bargains.price[i]
                 ]);
             }
         }
@@ -66,6 +66,6 @@ async function save_offers_to_DB(shop){
     });
 }
 
-//save_offers_to_DB('foetex');
+//save_bargains_to_DB('foetex');
 
-export { save_offers_to_DB };
+export { save_bargains_to_DB };

@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import sqlite3 from 'sqlite3';
-import routes from './routes/offers.js';  // Import the routes
+import routes from './routes/bargains.js';  // Import the routes
 
 const app = express();
 const PORT = 3000;
@@ -19,7 +19,7 @@ app.use('/databases', (req, res) => {
 });
 
 // Connecting to SQLite database
-const dbPath = path.join(__dirname, 'databases/offers.db');
+const dbPath = path.join(__dirname, 'databases/bargains.db');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error connecting to database:', err.message);

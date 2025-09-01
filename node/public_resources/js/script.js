@@ -1,4 +1,4 @@
-async function get_offers(offers){
+async function get_bargains(bargains){
     document.getElementById('send_wish_req').addEventListener('click', () => {
         document.getElementById("send_wish_req").disabled = true;
         let invalid_input_found = false;
@@ -33,12 +33,12 @@ async function get_offers(offers){
         const table_body = document.querySelector('#result_id tbody');
         table_body.innerHTML = ''; // Clear previous data
 
-        // Find the items from wishlist from the offers
+        // Find the items from wishlist from the bargains
         for (let i = 0; i < wish_list.length; i++){
             let product_found = false;
 
-            for (let j = 0; j < offers.length; j++){
-                if(offers[j].name.toLowerCase().includes(wish_list[i].toLowerCase())){
+            for (let j = 0; j < bargains.length; j++){
+                if(bargains[j].name.toLowerCase().includes(wish_list[i].toLowerCase())){
                     product_found = true;
                     
                     // Create row and cells
@@ -46,32 +46,35 @@ async function get_offers(offers){
 
                     // Name
                     const td_name = document.createElement('td');
-                    td_name.textContent = offers[j].name;
+                    td_name.textContent = bargains[j].name;
                     row.appendChild(td_name);
 
                     // Price 
                     const td_price = document.createElement('td');
                     // If not definded calc: "unit_price" / 1000 * smallest amount from "amount"
-                    if(offers[j].price === null){
-                        const min_amount = offers[j].amount.match(/^\d+/);
-                        td_price.textContent = parseInt(offers[j].unit_price / 1000 * min_amount[0]);
+                    if(bargains[j].price === null){
+                        const min_amount = bargains[j].amount.match(/^\d+/);
+                        td_price.textContent = parseInt(bargains[j].unit_price / 1000 * min_amount[0]);
                     } else {
-                        td_price.textContent = offers[j].price;
+                        td_price.textContent = bargains[j].price;
                     }
                     row.appendChild(td_price);
 
                     // Amount
                     const td_amount = document.createElement('td');
-                    td_amount.textContent = offers[j].amount + offers[j].unit;
+                    td_amount.textContent = bargains[j].amount + bargains[j].unit;
                     row.appendChild(td_amount);
 
                     // Unit Price
                     const td_unit_price = document.createElement('td');
-                    td_unit_price.textContent = offers[j].unit_price.toString().replace('.', ',') + ' ' + offers[j].unit_to_price;
+                    if(bargains[j].unit_price !== null && bargains[j].unit_price.toString().includes('.')){
+                        td_unit_price.textContent = bargains[j].unit_price.toString().replace('.', ',') + ' ' + bargains[j].unit_to_price;
+                    } else {
+                        td_unit_price.textContent = bargains[j].unit_price + ' ' + bargains[j].unit_to_price;
+                    }
                     row.appendChild(td_unit_price);
                     
                     table_body.appendChild(row);
-                    break;
                 }
             }
 
@@ -92,11 +95,11 @@ function is_valid_input(value) {
 }
 
 window.addEventListener('pageshow', async () => {
-    // Get offers
-    const offers_raw = await fetch('/api/offers');
-    const offers = await offers_raw.json();
-    console.log('Number of offers:', offers.length);
-    console.log('Offer retrieved from DB:', offers);
+    // Get bargains
+    const bargains_raw = await fetch('/api/bargains');
+    const bargains = await bargains_raw.json();
+    console.log('Number of bargains:', bargains.length);
+    console.log('Offer retrieved from DB:', bargains);
 
-    get_offers(offers);
+    get_bargains(bargains);
 });
