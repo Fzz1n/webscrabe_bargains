@@ -2,7 +2,6 @@ import { scrape_bargains } from './get_bargains_notice.js';
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
 
 // Convert import.meta.url to __filename and __dirname equivalents
 const __filename = fileURLToPath(import.meta.url);
@@ -65,7 +64,5 @@ async function save_bargains_to_DB(shop){
         });
     });
 }
-
-//save_bargains_to_DB('foetex');
 
 export { save_bargains_to_DB };
