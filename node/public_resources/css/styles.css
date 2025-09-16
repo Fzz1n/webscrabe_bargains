@@ -51,7 +51,6 @@ tbody tr:hover {
 }
 
 /* Button */
-
 button#send_wish_req {
   background-color: var(--primary-color);
   color: white;

@@ -3,6 +3,7 @@ async function get_bargains(bargains){
         document.getElementById("send_wish_req").disabled = true;
         let invalid_input_found = false;
         let wish_list = [];
+
         // Array fields
         document.querySelectorAll('#wishlist_products_id input').forEach(input => {
             const field = input.dataset.field;
@@ -51,6 +52,7 @@ async function get_bargains(bargains){
 
                     // Price 
                     const td_price = document.createElement('td');
+
                     // If not definded calc: "unit_price" / 1000 * smallest amount from "amount"
                     if(bargains[j].price === null){
                         const min_amount = bargains[j].amount.match(/^\d+/);
