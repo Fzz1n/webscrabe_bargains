@@ -30,6 +30,7 @@ async function save_bargains_to_DB(shop){
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT,
                 amount INTEGER,
+                min_amount INTEGER,
                 unit TEXT,
                 unit_to_price TEXT,
                 unit_price REAL,
@@ -41,8 +42,8 @@ async function save_bargains_to_DB(shop){
         db.run(`DELETE FROM sqlite_sequence WHERE name='bargains'`); // Reset ID 
 
         const insert_stmt = db.prepare (`
-            INSERT INTO bargains (name, amount, unit, unit_to_price, unit_price, price)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO bargains (name, amount, min_amount, unit, unit_to_price, unit_price, price)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         `);
 
         for(let i = 0; i < bargains.name.length; i++){
@@ -50,6 +51,7 @@ async function save_bargains_to_DB(shop){
                 insert_stmt.run([
                     bargains.name[i],
                     bargains.amount[i],
+                    bargains.min_amount[i],
                     bargains.unit[i],
                     bargains.unit_to_price[i],
                     bargains.unit_price[i],

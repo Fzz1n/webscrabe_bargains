@@ -26,6 +26,7 @@ async function scrape_bargains(page_url){
         const all_bargains = {
             name: [],
             amount: [],
+            min_amount: [],
             unit: [],
             unit_to_price: [],
             unit_price: [],
@@ -89,6 +90,10 @@ async function scrape_bargains(page_url){
                             all_bargains.name[index_prev_name] += " " + rest_product_name;
                             all_bargains.unit[product_num] = unit;
                             all_bargains.amount[product_num] = amount;
+                            const min_amount = amount.match(/^\d+/);
+                            if(min_amount !== null){
+                                all_bargains.min_amount[product_num] = min_amount[0];
+                            }
                         }
                     }
 
@@ -194,6 +199,10 @@ async function scrape_bargains(page_url){
                                 all_bargains.unit[product_num] = unit;
                             }
                             all_bargains.amount[product_num] = amount;
+                            const min_amount = amount.match(/^\d+/);
+                            if(min_amount !== null){
+                                all_bargains.min_amount[product_num] = min_amount[0];
+                            }
                         }
                     }
                 }
@@ -300,4 +309,4 @@ async function scrape_bargains(page_url){
 };
 
 export { scrape_bargains };
-scrape_bargains('https://avis.foetex.dk/naeste-uges-avis/'); // Replace with the URL of the site you want to scrape
+//scrape_bargains('https://avis.foetex.dk/naeste-uges-avis/'); // Replace with the URL of the site you want to scrape

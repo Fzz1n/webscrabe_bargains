@@ -50,8 +50,8 @@ tbody tr:hover {
   height: 50px;
 }
 
-/* Button */
-button#send_wish_req {
+/* Buttons */
+button {
   background-color: var(--primary-color);
   color: white;
   border: none;
@@ -64,7 +64,7 @@ button#send_wish_req {
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-button#send_wish_req:hover {
+button:hover {
   background-color: var(--primary-hover);
   box-shadow: 0 4px 12px rgb(0 86 179 / 0.8);
 }
