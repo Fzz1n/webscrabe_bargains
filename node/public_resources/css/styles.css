@@ -7,6 +7,7 @@
   --background-color: #f9f9f9;
   --border-color: #ddd;
   --solid-border-color: #696969;
+  --buttom-shadow: #317233;
   --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -67,20 +68,23 @@ button {
   background-color: var(--primary-color);
   color: white;
   border: none;
-  padding: 12px 20px;
   margin-right: 10px;
   border-radius: 30px;
   font-family: var(--font-family);
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 3px 8px rgb(0 123 255 / 0.6);
+  box-shadow: 0 3px 8px var(--buttom-shadow);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#send_wish_req {
+  padding: 6px 15px;
 }
 
 button:hover {
   background-color: var(--primary-hover);
-  box-shadow: 0 4px 12px rgb(0 86 179 / 0.8);
+  box-shadow: 0 4px 12px var(--primary-hover);
 }
 
 
