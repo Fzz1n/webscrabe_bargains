@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-da">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,17 +13,17 @@
     <table id="wishlist_products_id">
         <thead>
             <tr>
-                <th>Search for products</th>
+                <th colspan="6">Søg efter produkter:</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-              <td> <input type="text"> </td>
-              <td> <input type="text"> </td>
-              <td> <input type="text"> </td>
-              <td> <input type="text"> </td>
-              <td> <input type="text"> </td>
-              <td> <button type="submit" id="send_wish_req">Send Req</button> </td>
+              <td> <input type="text" placeholder="fx. 'Kylling'"> </td>
+              <td> <input type="text" placeholder="fx. 'Gris'"> </td>
+              <td> <input type="text" placeholder="fx. 'Oksekød'"> </td>
+              <td> <input type="text" placeholder="fx. 'Tomat'"> </td>
+              <td> <input type="text" placeholder="fx. 'Mælk'"> </td>
+              <td> <button type="submit" id="send_wish_req">Søg</button> </td>
             </tr>
         </tbody>
     </table>
@@ -31,10 +31,10 @@
     <table id="result_id" style="visibility:hidden"> 
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th> <button type="submit" id="filter_amount">Amount ⬆️</button> </th>
-                <th> <button type="submit" id="filter_unit_price">Unit price ⬆️</button> </th>
+                <th>Navn</th>
+                <th>Pris</th>
+                <th> <button type="submit" id="filter_amount">Størrelse ⬆️</button> </th>
+                <th> <button type="submit" id="filter_unit_price">Enhedspris ⬆️</button> </th>
             </tr>
         </thead>
         <tbody></tbody>

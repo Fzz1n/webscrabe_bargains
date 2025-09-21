@@ -2,30 +2,38 @@
 :root {
   --primary-color: #4CAF50;
   --primary-hover: #409643;
+  --secondary-hover: #EAFBEA;
   --text-color: #333;
   --background-color: #f9f9f9;
   --border-color: #ddd;
+  --solid-border-color: #696969;
   --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: var(--font-family);
+    font-size: 16px;
     text-align: center;
     margin-top: 50px;
+    background-color: var(--background-color);
 }
 
 h1 {
     color: var(--primary-color);
+    font-family: var(--font-family);
+    font-size: 32px;
+    font-weight: bold;
 }
 
 /* Tables */
 table {
-  width: 100%;
+  width: 70%;
+  margin: auto;
   border-collapse: collapse;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+  margin-bottom: 30px;
+  box-shadow: 0 10px 10px rgb(0 0 0 / 0.3);
   background: white;
-  border-radius: 6px;
+  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -41,7 +49,11 @@ th, td {
 }
 
 tbody tr:hover {
-  background-color: #f5faff;
+  background-color: var(--secondary-hover);
+}
+
+tr:last-child td {
+  border-bottom: none;
 }
 
 .placeholder-row td {
@@ -57,8 +69,10 @@ button {
   border: none;
   padding: 12px 20px;
   margin-right: 10px;
-  border-radius: 5px;
-  font-weight: 600;
+  border-radius: 30px;
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
   box-shadow: 0 3px 8px rgb(0 123 255 / 0.6);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
@@ -72,16 +86,34 @@ button:hover {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  body {
-    margin: 10px;
-  }
+  #wishlist_products_id tbody, 
+    #wishlist_products_id tr, 
+    #wishlist_products_id td {
+        display: block;
+        width: 100%;
+    }
 
-  th, td {
-    padding: 10px 8px;
-  }
+    #wishlist_products_id td {
+        padding: 8px 0;
+        text-align: center;
+        border-bottom: 1px solid var(--border-color);
+    }
 
-  button#send_wish_req {
-    width: 100%;
-    margin-bottom: 10px;
+    #wishlist_products_id td:last-child {
+        border-bottom: none;
+    }
+  
+  th, button{
+    font-size: 13px;
+  }
+  
+  button {
+    padding: 6px 10px;
+  }
+  
+  #result_id td, #result_id th {
+    padding: 5px 9px;
+    text-align: left;
+    font-size: 13px;
   }
 }
