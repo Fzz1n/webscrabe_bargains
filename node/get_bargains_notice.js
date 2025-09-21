@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { inflate } from 'zlib';
 
 async function scrape_bargains(page_url){
     try {
@@ -90,10 +91,7 @@ async function scrape_bargains(page_url){
                             all_bargains.name[index_prev_name] += " " + rest_product_name;
                             all_bargains.unit[product_num] = unit;
                             all_bargains.amount[product_num] = amount;
-                            const min_amount = amount.match(/^\d+/);
-                            if(min_amount !== null){
-                                all_bargains.min_amount[product_num] = min_amount[0];
-                            }
+                            all_bargains.min_amount[product_num] = find_min_amount(amount, unit);
                         }
                     }
 
@@ -199,10 +197,7 @@ async function scrape_bargains(page_url){
                                 all_bargains.unit[product_num] = unit;
                             }
                             all_bargains.amount[product_num] = amount;
-                            const min_amount = amount.match(/^\d+/);
-                            if(min_amount !== null){
-                                all_bargains.min_amount[product_num] = min_amount[0];
-                            }
+                            all_bargains.min_amount[product_num] = find_min_amount(amount, unit);
                         }
                     }
                 }
@@ -299,14 +294,129 @@ async function scrape_bargains(page_url){
             });
         });
 
-        // Insert in DB
-        console.log('Number of bargains:', all_bargains.name.length);
-        return all_bargains;
+        // Numbers of bargains and calc missing: price, amount, unit price
+        console.log('Number of bargains:', all_bargains.name.length);        
+        const bargains = cal_trilogi(all_bargains);
+
+        // Send to DB
+        return bargains;
 
     } catch (error) {
         console.error(error);
     }
 };
+
+// Find minimum amount
+function find_min_amount(amount, unit){
+    let cal_const = 1, min_amount;
+    if(unit === undefined){
+        return;
+    } else if(unit === 'kg' || unit === 'liter'){
+        cal_const = 1000;
+    } else if(unit === 'cl'){
+        cal_const = 10;
+    }
+
+    amount = amount.replace(',', '.');
+    if(amount.includes('-')){
+        min_amount = Number(amount.slice(0,amount.indexOf('-'))) * cal_const;
+    } else if(amount.includes('x')){
+        min_amount = Number(amount.slice(amount.indexOf('x')+1)) * cal_const;
+    } else if(amount === undefined){
+        min_amount = Infinity;
+    } else {
+        min_amount = Number(amount) * cal_const;
+    }
+
+    return min_amount;
+}
+
+// Calc missing: price, amount, or unit price
+function cal_trilogi(products){
+    let counter_up = 0, counter_a = 0, counter_p = 0;
+    for (let i = 0; i < products.name.length; i++){
+        let price = products.price[i],
+            amount = products.amount[i],
+            min_amount = products.min_amount[i],
+            unit = products.unit[i],
+            unit_price = products.unit_price[i],
+            unit_to_price = products.unit_to_price[i];
+        
+        if(min_amount !== undefined && unit_price === undefined){
+            // Find unit price
+            if(unit?.includes('g')){
+                if(amount === min_amount){
+                    unit_to_price = 'Pr. kg';
+                } else {
+                    unit_to_price = 'Pr. kg max.';
+                }
+            } else if(unit?.includes('l')){
+                if(amount === min_amount){
+                    unit_to_price = 'Pr. liter';
+                } else {
+                    unit_to_price = 'Pr. liter max.';
+                }
+            }
+
+            let cal_const = Math.pow(min_amount,2);
+            if(unit === 'g' || unit === 'ml'){
+                cal_const = 1000;
+            } else if(unit === 'cl'){
+                cal_const = 100;
+            }
+
+            unit_price = (cal_const / min_amount) * price;
+            counter_up++;
+
+        } else if(amount === undefined && unit_price !== undefined){
+            // Find amount, based on unit_to_price
+            if(unit_to_price.includes('kg')){
+                const kg_to_g = 1000;
+                amount = price / unit_price * kg_to_g;
+                unit = 'g';
+            } else if(unit_to_price.includes('liter')){
+                const l_to_ml = 1000;
+                const l_to_cl = 100;
+                const amount_ml = price / unit_price * l_to_ml;
+                const amount_cl = price / unit_price * l_to_cl;
+                amount = amount_ml + 'ml / ' + amount_cl;
+                unit = 'cl';
+            }
+            counter_a++;
+
+        } /*else if(price !== undefined && amount !== undefined && unit_price !== undefined){
+            // Find the correct unit measurement
+            let cal_const = 1;
+            if(unit === 'g' || unit === 'ml'){
+                cal_const = 1000;
+            } else if(unit === 'cl'){
+                cal_const = 100;
+            }
+            console.log(min_amount, unit_price);
+
+            // Validate price
+            const temp_price = min_amount * unit_price / cal_const;
+            if(Math.abs(price - temp_price) > 1){
+                price = temp_price;
+                counter_p++;
+            }
+        }*/
+
+        // Assign the new calcs
+        products.price[i] = price;
+        products.amount[i] = amount;
+        products.min_amount[i] = min_amount;
+        products.unit[i] = unit;
+        products.unit_price[i] = unit_price;
+        products.unit_to_price[i] = unit_to_price;
+    };
+    console.log('Product Recalculated:');
+    console.log('   Unit price:', counter_up);
+    console.log('   Amount:', counter_a);
+    console.log('   Price:', counter_p);
+
+    return products;
+}
 
 export { scrape_bargains };
 //scrape_bargains('https://avis.foetex.dk/naeste-uges-avis/'); // Replace with the URL of the site you want to scrape

@@ -7,23 +7,25 @@
   --background-color: #f9f9f9;
   --border-color: #ddd;
   --solid-border-color: #696969;
-  --buttom-shadow: #317233;
+  --button-shadow: #317233;
+  --warning-color: #A3A300;
+  --error-color: #FF0000;
   --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    font-family: var(--font-family);
-    font-size: 16px;
-    text-align: center;
-    margin-top: 50px;
-    background-color: var(--background-color);
+  font-family: var(--font-family);
+  font-size: 16px;
+  text-align: center;
+  margin-top: 50px;
+  background-color: var(--background-color);
 }
 
 h1 {
-    color: var(--primary-color);
-    font-family: var(--font-family);
-    font-size: 32px;
-    font-weight: bold;
+  color: var(--primary-color);
+  font-family: var(--font-family);
+  font-size: 32px;
+  font-weight: bold;
 }
 
 /* Tables */
@@ -49,7 +51,7 @@ th, td {
   text-align: left;
 }
 
-tbody tr:hover {
+#result_id tbody tr:hover {
   background-color: var(--secondary-hover);
 }
 
@@ -74,7 +76,7 @@ button {
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 3px 8px var(--buttom-shadow);
+  box-shadow: 0 3px 8px var(--button-shadow);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -87,31 +89,62 @@ button:hover {
   box-shadow: 0 4px 12px var(--primary-hover);
 }
 
+/* Text box */
+input[type="text"] {
+  border: 2px solid var(--primary-color);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 14px;
+  background-color: var(--secondary-hover);
+}
+
+input[type="text"]:focus {
+  border-color: var(--primary-hover);
+  outline: none;
+  box-shadow: 0 0 5px var(--primary-hover);
+}
+
+/* Error and warning messages*/
+.input-error {
+  color: var(--error-color);
+  font-size: 12px;
+  display: block;
+  margin-top: 2px;
+  height: 8px;
+}
+
+.input-warning {
+  color: var(--warning-color);
+  font-size: 12px;
+  display: block;
+  margin-top: 2px;
+  height: 8px;
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   #wishlist_products_id tbody, 
-    #wishlist_products_id tr, 
-    #wishlist_products_id td {
-        display: block;
-        width: 100%;
-    }
+  #wishlist_products_id tr, 
+  #wishlist_products_id td {
+    display: block;
+    width: 100%;
+  }
 
-    #wishlist_products_id td {
-        padding: 8px 0;
-        text-align: center;
-        border-bottom: 1px solid var(--border-color);
-    }
+  #wishlist_products_id td {
+    padding: 8px 0;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+  }
 
-    #wishlist_products_id td:last-child {
-        border-bottom: none;
-    }
+  #wishlist_products_id td:last-child {
+    border-bottom: none;
+  }
   
   th, button{
     font-size: 13px;
   }
   
-  button {
+  #send_wish_req {
     padding: 6px 10px;
   }
   
